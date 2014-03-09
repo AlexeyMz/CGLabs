@@ -42,7 +42,7 @@
     <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
     <TargetName>lab2</TargetName>
     <IntDir>$(ProjectDir)obj\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)FreeGlut\include;$(SolutionDir)libs\glew-1.10.0\include;$(SolutionDir)libs\glm-0.9.5.2\glm\glm;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)FreeGlut\include;$(SolutionDir)libs\glew-1.10.0\include;$(SolutionDir)submodules\glm\glm;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)bin\staticlib\$(Configuration)\;$(SolutionDir)libs\glew-1.10.0\lib\Release\Win32;$(LibraryPath)</LibraryPath>
     <SourcePath>$(ProjectDir)src;$(SourcePath)</SourcePath>
   </PropertyGroup>
@@ -50,7 +50,7 @@
     <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
     <TargetName>lab2</TargetName>
     <IntDir>$(ProjectDir)obj\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)FreeGlut\include;$(SolutionDir)libs\glew-1.10.0\include;$(SolutionDir)libs\glm-0.9.5.2\glm\glm;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)FreeGlut\include;$(SolutionDir)libs\glew-1.10.0\include;$(SolutionDir)submodules\glm\glm;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)bin\staticlib\$(Configuration)\;$(SolutionDir)libs\glew-1.10.0\lib\Release\Win32;$(LibraryPath)</LibraryPath>
     <SourcePath>$(ProjectDir)src;$(SourcePath)</SourcePath>
   </PropertyGroup>
