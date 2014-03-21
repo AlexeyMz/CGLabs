@@ -10,7 +10,7 @@ namespace zf
 	{
 		va_list ap;
 		va_start (ap, fmt);
-		std::string buf = vformat (fmt, ap);
+		std::string buf = vformat(fmt, ap);
 		va_end (ap);
 		return buf;
 	}
@@ -42,8 +42,8 @@ namespace zf
 			// vsnprintf reported that it wanted to write more characters
 			// than we allotted.  So try again using a dynamic buffer.  This
 			// doesn't happen very often if we chose our initial size well.
-			size = (needed > 0) ? (needed+1) : (size*2);
-			dynamicbuf.resize (size);
+			size = (needed > 0) ? (needed + 1) : (size * 2);
+			dynamicbuf.resize(size);
 			buf = &dynamicbuf[0];
 		}
 	}
