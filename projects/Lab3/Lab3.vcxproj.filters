@@ -13,5 +13,53 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\common">
+      <UniqueIdentifier>{7b995a93-f813-4b03-a2a8-238ba30ffea2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\common">
+      <UniqueIdentifier>{65524155-2177-4a55-9cee-c65218bccd05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\fx">
+      <UniqueIdentifier>{f1ac78ad-2fdb-43c1-9e23-f2269d9db081}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(SolutionDir)src\lab3\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)src\common\Effect.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)src\common\Shader.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)src\common\utils.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(SolutionDir)src\common\Effect.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)src\common\glincludes.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)src\common\Shader.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)src\common\ShaderLoadException.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)src\common\utils.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="fx\fragment.glsl">
+      <Filter>Resource Files\fx</Filter>
+    </None>
+    <None Include="fx\vertex.glsl">
+      <Filter>Resource Files\fx</Filter>
+    </None>
   </ItemGroup>
 </Project>

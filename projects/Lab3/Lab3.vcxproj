@@ -64,6 +64,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /i "$(ProjectDir)fx" "$(OutDir)fx"
+copy /y "$(SolutionDir)libs\glew-1.10.0\bin\Release\Win32\glew32.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -79,8 +83,27 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /i "$(ProjectDir)fx" "$(OutDir)fx"
+copy /y "$(SolutionDir)libs\glew-1.10.0\bin\Release\Win32\glew32.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="$(SolutionDir)src\lab3\main.cpp" />
+    <ClCompile Include="$(SolutionDir)src\common\Effect.cpp" />
+    <ClCompile Include="$(SolutionDir)src\common\Shader.cpp" />
+    <ClCompile Include="$(SolutionDir)src\common\utils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(SolutionDir)src\common\Effect.h" />
+    <ClInclude Include="$(SolutionDir)src\common\glincludes.h" />
+    <ClInclude Include="$(SolutionDir)src\common\Shader.h" />
+    <ClInclude Include="$(SolutionDir)src\common\ShaderLoadException.h" />
+    <ClInclude Include="$(SolutionDir)src\common\utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="fx\fragment.glsl" />
+    <None Include="fx\vertex.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
