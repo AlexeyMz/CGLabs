@@ -1,6 +1,7 @@
 #pragma once
 
 #include <GL/glew.h>
+#define FREEGLUT_STATIC
 #include <GL/freeglut.h>
 #include <GL/GL.h>
 #define GLM_FORCE_RADIANS
