@@ -3,9 +3,9 @@
 #include <tuple>
 #include <sstream>
 
-#include "glincludes.h"
-#include "Effect.h"
-#include "utils.h"
+#include "../common/glincludes.h"
+#include "../common/Effect.h"
+#include "../common/utils.h"
 
 static std::tuple<GLenum, std::string> blendModes[] = {
 	std::make_tuple(GL_ZERO,			    "0"),
