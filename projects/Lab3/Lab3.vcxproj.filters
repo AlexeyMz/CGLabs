@@ -45,6 +45,9 @@
     <ClCompile Include="..\..\src\lab3\Floor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\lab3\MirrorSphere.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(SolutionDir)src\common\Effect.h">
@@ -74,6 +77,9 @@
     <ClInclude Include="..\..\src\lab3\CommonDeclarations.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\lab3\MirrorSphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="textures\cube.tga">
@@ -89,6 +95,12 @@
       <Filter>Resource Files\fx</Filter>
     </None>
     <None Include="fx\cube_fragment.glsl">
+      <Filter>Resource Files\fx</Filter>
+    </None>
+    <None Include="fx\mirror_fragment.glsl">
+      <Filter>Resource Files\fx</Filter>
+    </None>
+    <None Include="fx\mirror_vertex.glsl">
       <Filter>Resource Files\fx</Filter>
     </None>
   </ItemGroup>

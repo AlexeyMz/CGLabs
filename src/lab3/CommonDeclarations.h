@@ -52,6 +52,6 @@ namespace zf
 		}
 
 		GLenum cap;
-		bool previousState;
+		GLboolean previousState;
 	};
 }

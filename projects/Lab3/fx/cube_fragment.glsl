@@ -45,5 +45,5 @@ void main()
 	//  - light is behind the triangle -> 0
 	float cosTheta = clamp(dot(n, l), 0, 1);
 
-	FragmentColor = texture2D(TextureUnit0, FragTexCoord) * (cosTheta + Ambient * vec4(1));
+	FragmentColor = texture2D(TextureUnit0, FragTexCoord) * (min(1, cosTheta + Ambient) * vec4(1));
 }

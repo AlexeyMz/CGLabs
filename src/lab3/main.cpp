@@ -9,13 +9,14 @@
 #include "../common/utils.h"
 #include "CommonDeclarations.h"
 #include "Floor.h"
+#include "MirrorSphere.h"
 
 class Scene {
 public:
 	Scene()
 		: isLeftButtonPressed(false),
 		cameraPosition(0, 0, 5), cameraRight(1, 0, 0), cameraUp(0, 1, 0), cameraLook(0, 0, -1),
-		projection(glm::perspective(45.0f, 1.0f, 1.0f, 100.0f))
+		projection(glm::perspective(45.0f, 1.0f, 1.0f, 500.0f)), isBumpMappingEnabled(false)
 	{
 		UpdateCamera();
 	}
@@ -31,8 +32,8 @@ public:
 			.Attach(fragment.CompileFile("fx/cube_fragment.glsl"))
 			.Link();
 
-		cubeTexture.LoadFromFile("textures/gateway_texture.tga", GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE);
-		normalSampler.LoadFromFile("textures/gateway_normals.tga", GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE);
+		cubeTexture.LoadFromFile("textures/gateway_texture.tga", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE);
+		normalSampler.LoadFromFile("textures/gateway_normals.tga", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE);
 
 		worldUniform = effect.Uniform("Model");
 		viewUniform = effect.Uniform("View");
@@ -45,8 +46,9 @@ public:
 		normalSamplerUniform = effect.Uniform("NormalSampler");
 
 		floor.Init();
+		mirror.Init();
 		
-		//glEnable(GL_CULL_FACE);
+		glEnable(GL_CULL_FACE);
 		glEnableClientState(GL_VERTEX_ATTRIB_ARRAY_POINTER);
 	}
 
@@ -62,10 +64,10 @@ public:
 		glUniform3fv(lightPositionUniform, 1, glm::value_ptr(cameraPosition));
 		glUniform4f(lightColorUniform, 1, 1, 1, 1);
 		
+		// set up cube texture and normal map
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, cubeTexture.ID());
 		glUniform1i(textureUniform, 0);
-		
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, normalSampler.ID());
 		glUniform1i(normalSamplerUniform, 1);
@@ -74,12 +76,9 @@ public:
 		auto model = glm::translate(glm::scale(
 			glm::translate(glm::mat4(), glm::vec3(0, floor.Height, 0)),
 			glm::vec3(1, -1, 1)), glm::vec3(0, -floor.Height, 0));
-		glm::mat3 mv3x3 = glm::mat3(view * model);
-		glUniformMatrix4fv(worldUniform, 1, false, glm::value_ptr(model));
-		glUniformMatrix3fv(mv3x3Uniform, 1, false, glm::value_ptr(mv3x3));
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, cubeTexture.ID());
-		RenderObjects();
+		glCullFace(GL_FRONT);
+		RenderObjects(model);
+		glCullFace(GL_BACK);
 
 		{ // draw floor
 			zf::UseCapability c1(GL_DEPTH_TEST, false);
@@ -89,15 +88,7 @@ public:
 			floor.Draw(projection * view);
 		}
 
-		effect.Apply();
-		model = glm::mat4();
-		mv3x3 = glm::mat3(view * model);
-		glUniformMatrix4fv(worldUniform, 1, false, glm::value_ptr(model));
-		glUniformMatrix3fv(mv3x3Uniform, 1, false, glm::value_ptr(mv3x3));
-		glUniform1f(ambientUniform, 0.1f);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, cubeTexture.ID());
-		RenderObjects();
+		RenderObjects(glm::mat4());
 
 		glDisable(GL_DEPTH_TEST);
 		glUseProgram(0);
@@ -112,10 +103,8 @@ public:
 		glutSwapBuffers();
 	}
 
-	void RenderObjects()
+	void RenderObjects(glm::mat4 model)
 	{
-		glBindTexture(GL_TEXTURE_2D, cubeTexture.ID());
-
 		glm::vec3 p[] = {
 			glm::vec3(-.5f,  .5f,  .5f),  //   1----2
 			glm::vec3(-.5f,  .5f, -.5f),  //  /:   /|
@@ -187,17 +176,31 @@ public:
 			n[0], n[0], n[0], n[0], n[0], n[0],
 		};
 
-		zf::UseVertexAttribPointer position(zf::VertexAttr::POSITION);
-		zf::UseVertexAttribPointer normal(zf::VertexAttr::NORMAL);
-		zf::UseVertexAttribPointer texCoord0(zf::VertexAttr::TEXCOORD0);
-		zf::UseVertexAttribPointer tangent(zf::VertexAttr::TANGENT);
-		zf::UseVertexAttribPointer bitangent(zf::VertexAttr::BITANGENT);
-		glVertexAttribPointer(position, 3, GL_FLOAT, false, 0, points);
-		glVertexAttribPointer(normal, 3, GL_FLOAT, false, 0, normals);
-		glVertexAttribPointer(texCoord0, 2, GL_FLOAT, false, 0, texCoords);
-		glVertexAttribPointer(tangent, 3, GL_FLOAT, false, 0, tangents);
-		glVertexAttribPointer(bitangent, 3, GL_FLOAT, false, 0, bitangents);
-		glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+		effect.Apply();
+		glm::mat3 mv3x3 = glm::mat3(view * model);
+		glUniformMatrix4fv(worldUniform, 1, false, glm::value_ptr(model));
+		glUniformMatrix3fv(mv3x3Uniform, 1, false, glm::value_ptr(mv3x3));
+		glUniform1f(ambientUniform, isBumpMappingEnabled ? .1f : 1.0f);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, cubeTexture.ID());
+
+		{ // draw cube
+			zf::UseVertexAttribPointer position(zf::VertexAttr::POSITION);
+			zf::UseVertexAttribPointer normal(zf::VertexAttr::NORMAL);
+			zf::UseVertexAttribPointer texCoord0(zf::VertexAttr::TEXCOORD0);
+			zf::UseVertexAttribPointer tangent(zf::VertexAttr::TANGENT);
+			zf::UseVertexAttribPointer bitangent(zf::VertexAttr::BITANGENT);
+			glVertexAttribPointer(position, 3, GL_FLOAT, false, 0, points);
+			glVertexAttribPointer(normal, 3, GL_FLOAT, false, 0, normals);
+			glVertexAttribPointer(texCoord0, 2, GL_FLOAT, false, 0, texCoords);
+			glVertexAttribPointer(tangent, 3, GL_FLOAT, false, 0, tangents);
+			glVertexAttribPointer(bitangent, 3, GL_FLOAT, false, 0, bitangents);
+			glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+		}
+
+		mirror.Draw(
+			model * glm::translate(glm::mat4(), glm::vec3(2, 3, 2)), view, projection,
+			floor.Texture, 1.0f / 100, floor.Height);
 	}
 
 	void UpdateCamera()
@@ -248,7 +251,7 @@ public:
 
 	void OnMouseWheel(int button, int direction)
 	{
-		float value = (direction > 0 ? 1 : -1);
+		float value = (direction > 0 ? 1.0f : -1.0f);
 		cameraPosition += cameraLook * value;
 		UpdateCamera();
 		glutPostRedisplay();
@@ -279,6 +282,12 @@ public:
 		glutPostRedisplay();
 	}
 
+	void ToggleIsBumpEnabled()
+	{
+		isBumpMappingEnabled = !isBumpMappingEnabled;
+		glutPostRedisplay();
+	}
+
 private:
 	zf::Effect effect;
 	zf::Texture2D cubeTexture, normalSampler;
@@ -293,10 +302,13 @@ private:
 	glm::vec3 cameraRight, cameraUp, cameraLook;
 
 	zf::Floor floor;
+	zf::MirrorSphere mirror;
 
 	bool isLeftButtonPressed;
 	bool isRightButtonPressed;
 	glm::vec2 mousePosition;
+
+	bool isBumpMappingEnabled;
 };
 
 Scene scene;
@@ -380,6 +392,13 @@ int main(int argc, char *argv[])
 	glutMouseWheelFunc([](int button, int direction, int x, int y){
 		scene.OnMouseWheel(button, direction);
 	});
+
+	int menu = glutCreateMenu([](int selectedItem){
+		if (selectedItem == 1)
+			scene.ToggleIsBumpEnabled();
+	});
+	glutAddMenuEntry("Toggle Bump Mapping", 1);
+	glutAttachMenu(GLUT_RIGHT_BUTTON);
 
 	glutMainLoop();
 	return 0;

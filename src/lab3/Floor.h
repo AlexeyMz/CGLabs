@@ -17,14 +17,13 @@ namespace zf
 		void Draw(glm::mat4 mvp);
 
 		float Height;
+		Texture2D Texture;
 
 	private:
 		Floor(const Floor &) {}
 		Floor & operator=(const Floor &) {}
 
 		Effect effect;
-		Texture2D texture;
-
 		GLint mvpUniform, ambientUniform, textureUniform;
 	};
 }
