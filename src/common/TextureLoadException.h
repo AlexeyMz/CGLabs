@@ -4,10 +4,10 @@
 
 namespace zf
 {
-	class ShaderLoadException : public std::runtime_error
+	class TextureLoadException : public std::runtime_error
 	{
 	public:
-		explicit ShaderLoadException(std::string message)
+		explicit TextureLoadException(std::string message)
 			: std::runtime_error(message)
 		{
 		}
