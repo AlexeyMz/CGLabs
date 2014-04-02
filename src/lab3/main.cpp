@@ -8,14 +8,14 @@
 #include "../common/Texture2D.h"
 #include "../common/utils.h"
 #include "CommonDeclarations.h"
+#include "Floor.h"
 
 class Scene {
 public:
 	Scene()
 		: isLeftButtonPressed(false),
 		cameraPosition(0, 0, 5), cameraRight(1, 0, 0), cameraUp(0, 1, 0), cameraLook(0, 0, -1),
-		projection(glm::perspective(45.0f, 1.0f, 1.0f, 100.0f)),
-		floorY(-1)
+		projection(glm::perspective(45.0f, 1.0f, 1.0f, 100.0f))
 	{
 		UpdateCamera();
 	}
@@ -27,26 +27,27 @@ public:
 		glClearColor(0, 0, 0, 1);
 		// Load shaders
 		zf::Shader vertex(GL_VERTEX_SHADER), fragment(GL_FRAGMENT_SHADER);
-		effect.Attach(vertex.CompileFile("fx/vertex.glsl"))
-			.Attach(fragment.CompileFile("fx/fragment.glsl"))
+		effect.Attach(vertex.CompileFile("fx/cube_vertex.glsl"))
+			.Attach(fragment.CompileFile("fx/cube_fragment.glsl"))
 			.Link();
 
-		cubeTexture.LoadFromFile("textures/baku.tga", GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE);
-		floorTexture.LoadFromFile("textures/floor.tga", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_MIRRORED_REPEAT);
+		cubeTexture.LoadFromFile("textures/gateway_texture.tga", GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE);
+		normalSampler.LoadFromFile("textures/gateway_normals.tga", GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
-		worldUniform = effect.Uniform("mWorld");
-		viewUniform = effect.Uniform("mView");
-		projectionUniform = effect.Uniform("mProjection");
-		lightPositionUniform = effect.Uniform("vLightPosition");
-		lightColorUniform = effect.Uniform("vLightColor");
-		ambientUniform = effect.Uniform("fAmbient");
-		textureUniform = effect.Uniform("textureUnit0");
+		worldUniform = effect.Uniform("Model");
+		viewUniform = effect.Uniform("View");
+		projectionUniform = effect.Uniform("Projection");
+		lightPositionUniform = effect.Uniform("LightPosition_worldspace");
+		lightColorUniform = effect.Uniform("LightColor");
+		ambientUniform = effect.Uniform("Ambient");
+		textureUniform = effect.Uniform("TextureUnit0");
+		mv3x3Uniform = effect.Uniform("MV3x3");
+		normalSamplerUniform = effect.Uniform("NormalSampler");
+
+		floor.Init();
 		
 		//glEnable(GL_CULL_FACE);
 		glEnableClientState(GL_VERTEX_ATTRIB_ARRAY_POINTER);
-		glEnableVertexAttribArray(zf::VertexAttr::POSITION);
-		glEnableVertexAttribArray(zf::VertexAttr::NORMAL);
-		glEnableVertexAttribArray(zf::VertexAttr::TEXCOORD0);
 	}
 
 	void Render()
@@ -56,44 +57,45 @@ public:
 		glEnable(GL_DEPTH_TEST);
 
 		effect.Apply();
-		
 		glUniformMatrix4fv(viewUniform, 1, false, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionUniform, 1, false, glm::value_ptr(projection));
-		auto v = glm::vec3(2, 2, -2);
 		glUniform3fv(lightPositionUniform, 1, glm::value_ptr(cameraPosition));
 		glUniform4f(lightColorUniform, 1, 1, 1, 1);
+		
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, cubeTexture.ID());
 		glUniform1i(textureUniform, 0);
+		
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, normalSampler.ID());
+		glUniform1i(normalSamplerUniform, 1);
 
 		// draw objects mirror
-		auto world = glm::translate(glm::scale(
-			glm::translate(glm::mat4(), glm::vec3(0, floorY, 0)),
-			glm::vec3(1, -1, 1)), glm::vec3(0, -floorY, 0));
-		glUniformMatrix4fv(worldUniform, 1, false, glm::value_ptr(world));
-		glUniform1f(ambientUniform, 0);
+		auto model = glm::translate(glm::scale(
+			glm::translate(glm::mat4(), glm::vec3(0, floor.Height, 0)),
+			glm::vec3(1, -1, 1)), glm::vec3(0, -floor.Height, 0));
+		glm::mat3 mv3x3 = glm::mat3(view * model);
+		glUniformMatrix4fv(worldUniform, 1, false, glm::value_ptr(model));
+		glUniformMatrix3fv(mv3x3Uniform, 1, false, glm::value_ptr(mv3x3));
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, cubeTexture.ID());
 		RenderObjects();
 
-		// draw floor
-		float size = 100;
-		world = glm::mat4(
-			size, 0, 0, 0,
-			0, 1, 0, 0,
-			0, 0, size, 0,
-			0, floorY, 0, 1);
-		glUniformMatrix4fv(worldUniform, 1, false, glm::value_ptr(world));
-		glUniform1f(ambientUniform, 1);
-		glBindTexture(GL_TEXTURE_2D, floorTexture.ID());
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA);
-		glBlendColor(0, 0, 0, .7f);
-		RenderFloor();
-		glDisable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
+		{ // draw floor
+			zf::UseCapability c1(GL_DEPTH_TEST, false);
+			zf::UseCapability c2(GL_BLEND, true);
+			glBlendFunc(GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA);
+			glBlendColor(0, 0, 0, .7f);
+			floor.Draw(projection * view);
+		}
 
-		world = glm::mat4();
-		glUniformMatrix4fv(worldUniform, 1, false, glm::value_ptr(world));
+		effect.Apply();
+		model = glm::mat4();
+		mv3x3 = glm::mat3(view * model);
+		glUniformMatrix4fv(worldUniform, 1, false, glm::value_ptr(model));
+		glUniformMatrix3fv(mv3x3Uniform, 1, false, glm::value_ptr(mv3x3));
 		glUniform1f(ambientUniform, 0.1f);
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, cubeTexture.ID());
 		RenderObjects();
 
@@ -108,34 +110,6 @@ public:
 		glutBitmapString(GLUT_BITMAP_HELVETICA_18, reinterpret_cast<const unsigned char *>(info.c_str()));
 
 		glutSwapBuffers();
-	}
-
-	void RenderFloor()
-	{
-		glm::vec3 points[] = {
-			glm::vec3(-1, 0, -1),  // 0----1   o--> x
-			glm::vec3( 1, 0, -1),  // |    |   |
-			glm::vec3( 1, 0,  1),  // |    |   v
-			glm::vec3(-1, 0,  1),  // 3----2   z
-		};
-		auto up = glm::vec3(0, 1, 0);
-		glm::vec3 normals[] = { up, up, up, up };
-		float repeatCount = 30;
-		float texCoords[] = {
-			0, repeatCount,
-			repeatCount, repeatCount,
-			repeatCount, 0,
-			0, 0,
-		};
-		GLubyte indices[] = {
-			0, 3, 1,
-			3, 2, 1,
-		};
-
-		glVertexAttribPointer(zf::VertexAttr::POSITION, 3, GL_FLOAT, false, 0, points);
-		glVertexAttribPointer(zf::VertexAttr::NORMAL, 3, GL_FLOAT, false, 0, normals);
-		glVertexAttribPointer(zf::VertexAttr::TEXCOORD0, 2, GL_FLOAT, false, 0, texCoords);
-		glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE, indices);
 	}
 
 	void RenderObjects()
@@ -196,10 +170,33 @@ public:
 			1, .25f, .5f, .5f, .5f, .25f,
 			1, .25f, 1, .5f, .5f, .5f,
 		};
+		glm::vec3 tangents[] = {
+			n[3], n[3], n[3], n[3], n[3], n[3],
+			n[2], n[2], n[2], n[2], n[2], n[2],
+			n[4], n[4], n[4], n[4], n[4], n[4],
+			n[5], n[5], n[5], n[5], n[5], n[5],
+			n[3], n[3], n[3], n[3], n[3], n[3],
+			n[2], n[2], n[2], n[2], n[2], n[2],
+		};
+		glm::vec3 bitangents[] = {
+			n[5], n[5], n[5], n[5], n[5], n[5],
+			n[4], n[4], n[4], n[4], n[4], n[4],
+			n[0], n[0], n[0], n[0], n[0], n[0],
+			n[0], n[0], n[0], n[0], n[0], n[0],
+			n[0], n[0], n[0], n[0], n[0], n[0],
+			n[0], n[0], n[0], n[0], n[0], n[0],
+		};
 
-		glVertexAttribPointer(zf::VertexAttr::POSITION, 3, GL_FLOAT, false, 0, points);
-		glVertexAttribPointer(zf::VertexAttr::NORMAL, 3, GL_FLOAT, false, 0, normals);
-		glVertexAttribPointer(zf::VertexAttr::TEXCOORD0, 2, GL_FLOAT, false, 0, texCoords);
+		zf::UseVertexAttribPointer position(zf::VertexAttr::POSITION);
+		zf::UseVertexAttribPointer normal(zf::VertexAttr::NORMAL);
+		zf::UseVertexAttribPointer texCoord0(zf::VertexAttr::TEXCOORD0);
+		zf::UseVertexAttribPointer tangent(zf::VertexAttr::TANGENT);
+		zf::UseVertexAttribPointer bitangent(zf::VertexAttr::BITANGENT);
+		glVertexAttribPointer(position, 3, GL_FLOAT, false, 0, points);
+		glVertexAttribPointer(normal, 3, GL_FLOAT, false, 0, normals);
+		glVertexAttribPointer(texCoord0, 2, GL_FLOAT, false, 0, texCoords);
+		glVertexAttribPointer(tangent, 3, GL_FLOAT, false, 0, tangents);
+		glVertexAttribPointer(bitangent, 3, GL_FLOAT, false, 0, bitangents);
 		glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
 	}
 
@@ -284,10 +281,10 @@ public:
 
 private:
 	zf::Effect effect;
-	zf::Texture2D cubeTexture, floorTexture;
-	GLint worldUniform, viewUniform, projectionUniform;
+	zf::Texture2D cubeTexture, normalSampler;
+	GLint worldUniform, viewUniform, projectionUniform, mv3x3Uniform;
 	GLint lightPositionUniform, lightColorUniform, ambientUniform;
-	GLint textureUniform;
+	GLint textureUniform, normalSamplerUniform;
 
 	glm::mat4 view;
 	glm::mat4 projection;
@@ -295,7 +292,7 @@ private:
 	glm::vec3 cameraPosition;
 	glm::vec3 cameraRight, cameraUp, cameraLook;
 
-	float floorY;
+	zf::Floor floor;
 
 	bool isLeftButtonPressed;
 	bool isRightButtonPressed;

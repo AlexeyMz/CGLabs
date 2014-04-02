@@ -66,6 +66,7 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y /i "$(ProjectDir)fx" "$(OutDir)fx"
+xcopy /y /i "$(ProjectDir)fx" "$(OutDir)textures"
 copy /y "$(SolutionDir)libs\glew-1.10.0\bin\Release\Win32\glew32.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -85,6 +86,7 @@ copy /y "$(SolutionDir)libs\glew-1.10.0\bin\Release\Win32\glew32.dll" "$(OutDir)
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y /i "$(ProjectDir)fx" "$(OutDir)fx"
+xcopy /y /i "$(ProjectDir)fx" "$(OutDir)textures"
 copy /y "$(SolutionDir)libs\glew-1.10.0\bin\Release\Win32\glew32.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -93,6 +95,8 @@ copy /y "$(SolutionDir)libs\glew-1.10.0\bin\Release\Win32\glew32.dll" "$(OutDir)
     <ClCompile Include="$(SolutionDir)src\common\Effect.cpp" />
     <ClCompile Include="$(SolutionDir)src\common\Shader.cpp" />
     <ClCompile Include="$(SolutionDir)src\common\utils.cpp" />
+    <ClCompile Include="..\..\src\common\Texture2D.cpp" />
+    <ClCompile Include="..\..\src\lab3\Floor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(SolutionDir)src\common\Effect.h" />
@@ -100,10 +104,17 @@ copy /y "$(SolutionDir)libs\glew-1.10.0\bin\Release\Win32\glew32.dll" "$(OutDir)
     <ClInclude Include="$(SolutionDir)src\common\Shader.h" />
     <ClInclude Include="$(SolutionDir)src\common\ShaderLoadException.h" />
     <ClInclude Include="$(SolutionDir)src\common\utils.h" />
+    <ClInclude Include="..\..\src\common\Texture2D.h" />
+    <ClInclude Include="..\..\src\common\TextureLoadException.h" />
+    <ClInclude Include="..\..\src\lab3\CommonDeclarations.h" />
+    <ClInclude Include="..\..\src\lab3\Floor.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="fx\fragment.glsl" />
-    <None Include="fx\vertex.glsl" />
+    <None Include="fx\floor_fragment.glsl" />
+    <None Include="fx\floor_vertex.glsl" />
+    <None Include="fx\cube_fragment.glsl" />
+    <None Include="fx\cube_vertex.glsl" />
+    <None Include="textures\cube.tga" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
