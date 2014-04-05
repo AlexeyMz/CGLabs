@@ -11,5 +11,15 @@ namespace zf
 			: std::runtime_error(message)
 		{
 		}
+
+		explicit ShaderLoadException(std::string message, std::string shaderPath)
+			: std::runtime_error(message), shaderPath(shaderPath)
+		{
+		}
+
+		const std::string ShaderPath() const { return shaderPath; }
+
+	private:
+		std::string shaderPath;
 	};
 }

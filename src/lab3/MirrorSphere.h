@@ -17,7 +17,7 @@ namespace zf
 		void Init();
 		void Draw(
 			glm::mat4 model, glm::mat4 view, glm::mat4 projection,
-			Texture2D &floorTexture, float floorTextureScaling, float floorHeight);
+			Texture2D &floorTexture, glm::mat4 floorModel);
 
 		float Height;
 
@@ -32,6 +32,6 @@ namespace zf
 		std::vector<glm::vec3> points;
 
 		GLint modelUniform, viewUniform, projectionUniform;
-		GLint floorTextureUniform, floorTextureScalingUniform, floorHeightUniform;
+		GLint floorTextureUniform, floorModelUniform;
 	};
 }

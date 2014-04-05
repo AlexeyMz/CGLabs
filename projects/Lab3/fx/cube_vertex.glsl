@@ -20,7 +20,7 @@ out vec3 vBitangent_modelspace;
 
 void main()
 {
-	vec3 position_worldspace = (Model * vec4(Position_modelspace, 1)).xyz;
+	vec3 position_worldspace = vec3(Model * vec4(Position_modelspace, 1));
     vec3 lightDir_worldspace = normalize(LightPosition_worldspace - position_worldspace);
     
     gl_Position = Projection * View * vec4(position_worldspace, 1);
@@ -28,7 +28,7 @@ void main()
 
 	// Normal of the the vertex, in camera space
 	// Only correct if ModelMatrix does not scale the model ! Use its inverse transpose if not.
-	LightDirection_cameraspace = (View * vec4(lightDir_worldspace, 0)).xyz;
+	LightDirection_cameraspace = vec3(View * vec4(lightDir_worldspace, 0));
 
 	vNormal_modelspace = Normal_modelspace;
 	vTangent_modelspace = Tangent_modelspace;

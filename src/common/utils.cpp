@@ -48,17 +48,18 @@ namespace zf
 		}
 	}
 
-	std::vector<char> ReadAllBytes(char const* filename)
+	bool ReadAllBytes(char const* filename, std::vector<char> &result)
 	{
 		std::ifstream ifs(filename, std::ios::binary | std::ios::ate);
-		std::ifstream::pos_type pos = ifs.tellg();
+		if (!ifs)
+			return false;
 
-		std::vector<char> result(static_cast<unsigned int>(pos));
+		std::ifstream::pos_type pos = ifs.tellg();
+		result.resize(static_cast<size_t>(pos));
 
 		ifs.seekg(0, std::ios::beg);
 		ifs.read(&result[0], pos);
-
-		return result;
+		return true;
 	}
 
 	std::string ToString(const glm::vec3 &v)

@@ -15,10 +15,11 @@ namespace zf
 
 	struct UseVertexAttribPointer
 	{
-		UseVertexAttribPointer(GLuint index)
+		UseVertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* pointer)
 			: attributeIndex(index)
 		{
 			glEnableVertexAttribArray(index);
+			glVertexAttribPointer(index, size, type, normalized, stride, pointer);
 		}
 
 		~UseVertexAttribPointer()

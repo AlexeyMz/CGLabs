@@ -21,29 +21,25 @@ namespace zf
 		viewUniform = effect.Uniform("View");
 		projectionUniform = effect.Uniform("Projection");
 		floorTextureUniform = effect.Uniform("FloorTexture");
-		floorTextureScalingUniform = effect.Uniform("FloorTextureScaling");
-		floorHeightUniform = effect.Uniform("FloorHeight");
+		floorModelUniform = effect.Uniform("FloorModel");
 
 		GenerateGeosphere(4);
 	}
 
 	void MirrorSphere::Draw(
 		glm::mat4 model, glm::mat4 view, glm::mat4 projection,
-		Texture2D &floorTexture, float floorTextureScaling, float floorHeight)
+		Texture2D &floorTexture, glm::mat4 floorModel)
 	{
 		effect.Apply();
 		glUniformMatrix4fv(modelUniform, 1, false, glm::value_ptr(model));
 		glUniformMatrix4fv(viewUniform, 1, false, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionUniform, 1, false, glm::value_ptr(projection));
-		glUniform1f(floorTextureScalingUniform, floorTextureScaling);
-		glUniform1f(floorHeightUniform, floorHeight);
-		glBindTexture(GL_TEXTURE_2D, floorTexture.ID());
+		glUniformMatrix4fv(floorModelUniform, 1, false, glm::value_ptr(floorModel));
+		floorTexture.Bind();
 		glUniform1i(floorTextureUniform, 0);
 
-		UseVertexAttribPointer position(VertexAttr::POSITION);
-		UseVertexAttribPointer normal(VertexAttr::NORMAL);
-		glVertexAttribPointer(position, 3, GL_FLOAT, false, 0, &points[0]);
-		glVertexAttribPointer(normal, 3, GL_FLOAT, false, 0, &points[0]);
+		UseVertexAttribPointer position(VertexAttr::POSITION, 3, GL_FLOAT, false, 0, &points[0]);
+		UseVertexAttribPointer normal(VertexAttr::NORMAL, 3, GL_FLOAT, false, 0, &points[0]);
 		glDrawArrays(GL_TRIANGLES, 0, points.size());
 	}
 

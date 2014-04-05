@@ -11,6 +11,8 @@ namespace zf
 		~Texture2D();
 
 		GLuint ID() const { return id; }
+		void Bind();
+
 		GLint Width() const { return width; }
 		GLint Height() const { return height; }
 		GLenum Format() const { return format; }

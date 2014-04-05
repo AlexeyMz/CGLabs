@@ -3,7 +3,7 @@
 namespace zf
 {
 	Floor::Floor()
-		: Height(-1)
+		: Height(-1), Size(5)
 	{
 	}
 
@@ -22,10 +22,10 @@ namespace zf
 		ambientUniform = effect.Uniform("fAmbient");
 		textureUniform = effect.Uniform("textureUnit0");
 
-		Texture.LoadFromFile("textures/floor.tga", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_MIRRORED_REPEAT);
+		Texture.LoadFromFile("textures/baku.tga", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_MIRRORED_REPEAT);
 	}
 
-	void Floor::Draw(glm::mat4 viewProjection)
+	void Floor::Draw(glm::mat4 modelViewProjection)
 	{
 		glm::vec3 points[] = {
 			glm::vec3(-1, 0, -1),  // 0----1   o--> x
@@ -35,12 +35,12 @@ namespace zf
 		};
 		auto up = glm::vec3(0, 1, 0);
 		glm::vec3 normals[] = { up, up, up, up };
-		float repeatCount = 2;
+		float repeatCount = 1;
 		float texCoords[] = {
+			0, 0,
 			0, repeatCount,
 			repeatCount, repeatCount,
 			repeatCount, 0,
-			0, 0,
 		};
 		GLubyte indices[] = {
 			0, 3, 1,
@@ -48,21 +48,13 @@ namespace zf
 		};
 
 		effect.Apply();
-
-		float size = 100;
-		auto mvp = viewProjection * glm::mat4(
-			size, 0, 0, 0,
-			0, 1, 0, 0,
-			0, 0, size, 0,
-			0, Height, 0, 1);
-		glUniformMatrix4fv(mvpUniform, 1, false, glm::value_ptr(mvp));
+		glUniformMatrix4fv(mvpUniform, 1, false, glm::value_ptr(modelViewProjection));
 		glUniform1f(ambientUniform, 1);
-		glBindTexture(GL_TEXTURE_2D, Texture.ID());
+		Texture.Bind();
+		glUniform1i(textureUniform, 0);
 
-		UseVertexAttribPointer position(VertexAttr::POSITION);
-		UseVertexAttribPointer texCoord0(VertexAttr::TEXCOORD0);
-		glVertexAttribPointer(position, 3, GL_FLOAT, false, 0, points);
-		glVertexAttribPointer(texCoord0, 2, GL_FLOAT, false, 0, texCoords);
+		UseVertexAttribPointer position(VertexAttr::POSITION, 3, GL_FLOAT, false, 0, points);
+		UseVertexAttribPointer texCoord0(VertexAttr::TEXCOORD0, 2, GL_FLOAT, false, 0, texCoords);
 		glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE, indices);
 	}
 }

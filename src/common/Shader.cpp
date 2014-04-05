@@ -53,9 +53,16 @@ namespace zf
 
 	Shader & Shader::CompileFile(const char *fileName)
 	{
-		auto bytes = ReadAllBytes(fileName);
-		bytes.push_back(0);
-		return CompileText(&bytes[0]);
+		std::vector<char> bytes;
+		if (!ReadAllBytes(fileName, bytes))
+			throw ShaderLoadException("Cannot read shader file.", fileName);
+
+		try {
+			bytes.push_back(0);
+			return CompileText(&bytes[0]);
+		} catch (ShaderLoadException &ex) {
+			throw ShaderLoadException(ex.what(), fileName);
+		}
 	}
 
 	void Shader::Validate()

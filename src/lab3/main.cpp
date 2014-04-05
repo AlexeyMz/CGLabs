@@ -16,22 +16,22 @@ public:
 	Scene()
 		: isLeftButtonPressed(false),
 		cameraPosition(0, 0, 5), cameraRight(1, 0, 0), cameraUp(0, 1, 0), cameraLook(0, 0, -1),
-		projection(glm::perspective(45.0f, 1.0f, 1.0f, 500.0f)), isBumpMappingEnabled(false)
+		isBumpMappingEnabled(false)
 	{
 		UpdateCamera();
 	}
 
 	void Init()
 	{
-		// Blue background
-		//glClearColor(100 / 255.f, 149 / 255.f, 237 / 255.f, 1.0f);
+		// Black background
 		glClearColor(0, 0, 0, 1);
-		// Load shaders
+		// Load cube shaders
 		zf::Shader vertex(GL_VERTEX_SHADER), fragment(GL_FRAGMENT_SHADER);
 		effect.Attach(vertex.CompileFile("fx/cube_vertex.glsl"))
 			.Attach(fragment.CompileFile("fx/cube_fragment.glsl"))
 			.Link();
 
+		// load cube texture and normal map
 		cubeTexture.LoadFromFile("textures/gateway_texture.tga", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE);
 		normalSampler.LoadFromFile("textures/gateway_normals.tga", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE);
 
@@ -47,6 +47,12 @@ public:
 
 		floor.Init();
 		mirror.Init();
+
+		floorModel = glm::mat4(
+			floor.Size, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, floor.Size, 0,
+			0, floor.Height, 0, 1);
 		
 		glEnable(GL_CULL_FACE);
 		glEnableClientState(GL_VERTEX_ATTRIB_ARRAY_POINTER);
@@ -66,10 +72,10 @@ public:
 		
 		// set up cube texture and normal map
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, cubeTexture.ID());
+		cubeTexture.Bind();
 		glUniform1i(textureUniform, 0);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, normalSampler.ID());
+		normalSampler.Bind();
 		glUniform1i(normalSamplerUniform, 1);
 
 		// draw objects mirror
@@ -85,7 +91,7 @@ public:
 			zf::UseCapability c2(GL_BLEND, true);
 			glBlendFunc(GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA);
 			glBlendColor(0, 0, 0, .7f);
-			floor.Draw(projection * view);
+			floor.Draw(projection * view * floorModel);
 		}
 
 		RenderObjects(glm::mat4());
@@ -177,30 +183,26 @@ public:
 		};
 
 		effect.Apply();
-		glm::mat3 mv3x3 = glm::mat3(view * model);
-		glUniformMatrix4fv(worldUniform, 1, false, glm::value_ptr(model));
+		glm::mat4 cubeModel = model * glm::translate(glm::mat4(), glm::vec3(1, 0, 1));
+		glm::mat3 mv3x3 = glm::mat3(view * cubeModel);
+		glUniformMatrix4fv(worldUniform, 1, false, glm::value_ptr(cubeModel));
 		glUniformMatrix3fv(mv3x3Uniform, 1, false, glm::value_ptr(mv3x3));
 		glUniform1f(ambientUniform, isBumpMappingEnabled ? .1f : 1.0f);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, cubeTexture.ID());
+		cubeTexture.Bind();
 
 		{ // draw cube
-			zf::UseVertexAttribPointer position(zf::VertexAttr::POSITION);
-			zf::UseVertexAttribPointer normal(zf::VertexAttr::NORMAL);
-			zf::UseVertexAttribPointer texCoord0(zf::VertexAttr::TEXCOORD0);
-			zf::UseVertexAttribPointer tangent(zf::VertexAttr::TANGENT);
-			zf::UseVertexAttribPointer bitangent(zf::VertexAttr::BITANGENT);
-			glVertexAttribPointer(position, 3, GL_FLOAT, false, 0, points);
-			glVertexAttribPointer(normal, 3, GL_FLOAT, false, 0, normals);
-			glVertexAttribPointer(texCoord0, 2, GL_FLOAT, false, 0, texCoords);
-			glVertexAttribPointer(tangent, 3, GL_FLOAT, false, 0, tangents);
-			glVertexAttribPointer(bitangent, 3, GL_FLOAT, false, 0, bitangents);
+			zf::UseVertexAttribPointer position(zf::VertexAttr::POSITION,   3, GL_FLOAT, false, 0, points);
+			zf::UseVertexAttribPointer normal(zf::VertexAttr::NORMAL,       3, GL_FLOAT, false, 0, normals);
+			zf::UseVertexAttribPointer texCoord0(zf::VertexAttr::TEXCOORD0, 2, GL_FLOAT, false, 0, texCoords);
+			zf::UseVertexAttribPointer tangent(zf::VertexAttr::TANGENT,     3, GL_FLOAT, false, 0, tangents);
+			zf::UseVertexAttribPointer bitangent(zf::VertexAttr::BITANGENT, 3, GL_FLOAT, false, 0, bitangents);
 			glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
 		}
 
 		mirror.Draw(
-			model * glm::translate(glm::mat4(), glm::vec3(2, 3, 2)), view, projection,
-			floor.Texture, 1.0f / 100, floor.Height);
+			model * glm::translate(glm::mat4(), glm::vec3(0, 3, 0)), view, projection,
+			floor.Texture, floorModel);
 	}
 
 	void UpdateCamera()
@@ -208,6 +210,12 @@ public:
 		auto position = cameraPosition;
 		position.y = std::max(0.0f, position.y);
 		view = glm::lookAt(position, position + cameraLook, cameraUp);
+	}
+
+	void UpdateProjection(int viewportWidth, int viewportHeight)
+	{
+		float aspectRatio = 1.0f * viewportWidth / viewportHeight;
+		projection = glm::perspective(45.0f, aspectRatio, 1.0f, 500.0f);
 	}
 
 	void OnMouseAction(int button, int state, int x, int y)
@@ -264,21 +272,6 @@ public:
 
 	void OnSpecialKeyPress(int key, int x, int y)
 	{
-		//const float MovementVelocity = 0.05f;
-		//if (key == GLUT_KEY_LEFT) {
-		//	cameraPosition -= cameraRight * MovementVelocity;
-		//	UpdateCamera();
-		//} else if (key == GLUT_KEY_RIGHT) {
-		//	cameraPosition += cameraRight * MovementVelocity;
-		//	UpdateCamera();
-		//} else if (key == GLUT_KEY_UP) {
-		//	cameraPosition += cameraLook * MovementVelocity;
-		//	UpdateCamera();
-		//} else if (key == GLUT_KEY_DOWN) {
-		//	cameraPosition -= cameraLook * MovementVelocity;
-		//	UpdateCamera();
-		//}
-
 		glutPostRedisplay();
 	}
 
@@ -301,6 +294,7 @@ private:
 	glm::vec3 cameraPosition;
 	glm::vec3 cameraRight, cameraUp, cameraLook;
 
+	glm::mat4 floorModel;
 	zf::Floor floor;
 	zf::MirrorSphere mirror;
 
@@ -313,7 +307,7 @@ private:
 
 Scene scene;
 
-void onError(std::string message)
+void onError(const std::string &message)
 {
 	std::cerr << message << std::endl;
 	std::cout << "Press <Enter> to exit...";
@@ -364,13 +358,19 @@ int main(int argc, char *argv[])
 	try {
 		scene.Init();
 	} catch (zf::ShaderLoadException &ex) {
-		onError(ex.what());
+		std::string message = ex.ShaderPath().length() > 0
+			? (ex.ShaderPath() + ": ") : "<in-memory shader>: ";
+		onError(message + ex.what());
 		return 3;
 	} catch (std::runtime_error &err) {
 		onError(err.what());
 		return 4;
 	}
 
+	glutReshapeFunc([](int width, int height){
+		glViewport(0, 0, width, height);
+		scene.UpdateProjection(width, height);
+	});
 	glutDisplayFunc([](){
 		scene.Render();
 	});

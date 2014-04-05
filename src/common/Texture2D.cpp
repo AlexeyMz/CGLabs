@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <vector>
+#include <string>
 #include <assert.h>
 #include "TextureLoadException.h"
 
@@ -40,6 +41,8 @@ namespace
 
 		// Attempt to open the file
 		std::ifstream ifs(fileName, std::ios::binary);
+		if (!ifs)
+			throw zf::TextureLoadException(std::string("Cannot open texture '") + fileName + "'.");
 		
 		TGAHEADER tgaHeader;  // TGA file header
 		unsigned int HEADER_SIZE = 18;
@@ -107,6 +110,12 @@ namespace zf
 	{
 		if (glIsTexture(id))
 			glDeleteTextures(1, &id);
+	}
+
+	void Texture2D::Bind()
+	{
+		assert(id != 0);
+		glBindTexture(GL_TEXTURE_2D, id);
 	}
 
 	void Texture2D::LoadFromFile(const char *fileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode)

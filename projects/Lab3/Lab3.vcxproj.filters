@@ -39,13 +39,13 @@
     <ClCompile Include="$(SolutionDir)src\common\utils.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\common\Texture2D.cpp">
-      <Filter>Source Files\common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\lab3\Floor.cpp">
+    <ClCompile Include="$(SolutionDir)src\common\Texture2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\lab3\MirrorSphere.cpp">
+    <ClCompile Include="$(SolutionDir)src\lab3\Floor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)src\lab3\MirrorSphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -65,26 +65,23 @@
     <ClInclude Include="$(SolutionDir)src\common\utils.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\common\Texture2D.h">
-      <Filter>Header Files\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\common\TextureLoadException.h">
-      <Filter>Header Files\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\lab3\Floor.h">
+    <ClInclude Include="$(SolutionDir)src\common\Texture2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\lab3\CommonDeclarations.h">
+    <ClInclude Include="$(SolutionDir)src\common\TextureLoadException.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\lab3\MirrorSphere.h">
+    <ClInclude Include="$(SolutionDir)src\lab3\CommonDeclarations.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)src\lab3\Floor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)src\lab3\MirrorSphere.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="textures\cube.tga">
-      <Filter>Resource Files\textures</Filter>
-    </None>
     <None Include="fx\floor_fragment.glsl">
       <Filter>Resource Files\fx</Filter>
     </None>
@@ -102,6 +99,27 @@
     </None>
     <None Include="fx\mirror_vertex.glsl">
       <Filter>Resource Files\fx</Filter>
+    </None>
+    <None Include="textures\baku.tga">
+      <Filter>Resource Files\textures</Filter>
+    </None>
+    <None Include="textures\bricks_normals.tga">
+      <Filter>Resource Files\textures</Filter>
+    </None>
+    <None Include="textures\cube.tga">
+      <Filter>Resource Files\textures</Filter>
+    </None>
+    <None Include="textures\floor.tga">
+      <Filter>Resource Files\textures</Filter>
+    </None>
+    <None Include="textures\gateway_normals.tga">
+      <Filter>Resource Files\textures</Filter>
+    </None>
+    <None Include="textures\gateway_texture.tga">
+      <Filter>Resource Files\textures</Filter>
+    </None>
+    <None Include="textures\simon.tga">
+      <Filter>Resource Files\textures</Filter>
     </None>
   </ItemGroup>
 </Project>

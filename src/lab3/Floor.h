@@ -17,6 +17,7 @@ namespace zf
 		void Draw(glm::mat4 mvp);
 
 		float Height;
+		float Size;
 		Texture2D Texture;
 
 	private:

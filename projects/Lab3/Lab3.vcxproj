@@ -66,7 +66,7 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y /i "$(ProjectDir)fx" "$(OutDir)fx"
-xcopy /y /i "$(ProjectDir)fx" "$(OutDir)textures"
+xcopy /y /i "$(ProjectDir)textures" "$(OutDir)textures"
 copy /y "$(SolutionDir)libs\glew-1.10.0\bin\Release\Win32\glew32.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -86,7 +86,7 @@ copy /y "$(SolutionDir)libs\glew-1.10.0\bin\Release\Win32\glew32.dll" "$(OutDir)
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y /i "$(ProjectDir)fx" "$(OutDir)fx"
-xcopy /y /i "$(ProjectDir)fx" "$(OutDir)textures"
+xcopy /y /i "$(ProjectDir)textures" "$(OutDir)textures"
 copy /y "$(SolutionDir)libs\glew-1.10.0\bin\Release\Win32\glew32.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -95,9 +95,9 @@ copy /y "$(SolutionDir)libs\glew-1.10.0\bin\Release\Win32\glew32.dll" "$(OutDir)
     <ClCompile Include="$(SolutionDir)src\common\Effect.cpp" />
     <ClCompile Include="$(SolutionDir)src\common\Shader.cpp" />
     <ClCompile Include="$(SolutionDir)src\common\utils.cpp" />
-    <ClCompile Include="..\..\src\common\Texture2D.cpp" />
-    <ClCompile Include="..\..\src\lab3\Floor.cpp" />
-    <ClCompile Include="..\..\src\lab3\MirrorSphere.cpp" />
+    <ClCompile Include="$(SolutionDir)src\common\Texture2D.cpp" />
+    <ClCompile Include="$(SolutionDir)src\lab3\Floor.cpp" />
+    <ClCompile Include="$(SolutionDir)src\lab3\MirrorSphere.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(SolutionDir)src\common\Effect.h" />
@@ -105,11 +105,11 @@ copy /y "$(SolutionDir)libs\glew-1.10.0\bin\Release\Win32\glew32.dll" "$(OutDir)
     <ClInclude Include="$(SolutionDir)src\common\Shader.h" />
     <ClInclude Include="$(SolutionDir)src\common\ShaderLoadException.h" />
     <ClInclude Include="$(SolutionDir)src\common\utils.h" />
-    <ClInclude Include="..\..\src\common\Texture2D.h" />
-    <ClInclude Include="..\..\src\common\TextureLoadException.h" />
-    <ClInclude Include="..\..\src\lab3\CommonDeclarations.h" />
-    <ClInclude Include="..\..\src\lab3\Floor.h" />
-    <ClInclude Include="..\..\src\lab3\MirrorSphere.h" />
+    <ClInclude Include="$(SolutionDir)src\common\Texture2D.h" />
+    <ClInclude Include="$(SolutionDir)src\common\TextureLoadException.h" />
+    <ClInclude Include="$(SolutionDir)src\lab3\CommonDeclarations.h" />
+    <ClInclude Include="$(SolutionDir)src\lab3\Floor.h" />
+    <ClInclude Include="$(SolutionDir)src\lab3\MirrorSphere.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="fx\floor_fragment.glsl" />
@@ -118,7 +118,13 @@ copy /y "$(SolutionDir)libs\glew-1.10.0\bin\Release\Win32\glew32.dll" "$(OutDir)
     <None Include="fx\cube_vertex.glsl" />
     <None Include="fx\mirror_fragment.glsl" />
     <None Include="fx\mirror_vertex.glsl" />
+    <None Include="textures\baku.tga" />
+    <None Include="textures\bricks_normals.tga" />
     <None Include="textures\cube.tga" />
+    <None Include="textures\floor.tga" />
+    <None Include="textures\gateway_normals.tga" />
+    <None Include="textures\gateway_texture.tga" />
+    <None Include="textures\simon.tga" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
