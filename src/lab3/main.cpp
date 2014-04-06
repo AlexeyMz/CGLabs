@@ -174,8 +174,8 @@ public:
 			n[2], n[2], n[2], n[2], n[2], n[2],
 		};
 		glm::vec3 bitangents[] = {
-			n[5], n[5], n[5], n[5], n[5], n[5],
-			n[4], n[4], n[4], n[4], n[4], n[4],
+			n[5], n[5], n[5], n[5], n[5], n[5], // could be easily computed from
+			n[4], n[4], n[4], n[4], n[4], n[4], // normals and tangents...
 			n[0], n[0], n[0], n[0], n[0], n[0],
 			n[0], n[0], n[0], n[0], n[0], n[0],
 			n[0], n[0], n[0], n[0], n[0], n[0],
