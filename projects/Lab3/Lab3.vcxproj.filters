@@ -77,7 +77,7 @@
     <ClInclude Include="$(SolutionDir)src\common\Texture2D.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\common\CommonDeclarations.h">
+    <ClInclude Include="$(SolutionDir)src\common\CommonDeclarations.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
   </ItemGroup>
