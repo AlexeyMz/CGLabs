@@ -70,7 +70,7 @@ namespace zf
 		p.push_back(start[2]);
 
 		for (int i = 0; i < level; i++) {
-			for (int j = 0; j < p.size(); j += 3) {
+			for (size_t j = 0; j < p.size(); j += 3) {
 				auto p1 = p[j + 0];
 				auto p2 = p[j + 1];
 				auto p3 = p[j + 2];

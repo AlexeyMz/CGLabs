@@ -107,9 +107,9 @@ copy /y "$(SolutionDir)libs\glew-1.10.0\bin\Release\Win32\glew32.dll" "$(OutDir)
     <ClInclude Include="$(SolutionDir)src\common\utils.h" />
     <ClInclude Include="$(SolutionDir)src\common\Texture2D.h" />
     <ClInclude Include="$(SolutionDir)src\common\TextureLoadException.h" />
-    <ClInclude Include="$(SolutionDir)src\lab3\CommonDeclarations.h" />
     <ClInclude Include="$(SolutionDir)src\lab3\Floor.h" />
     <ClInclude Include="$(SolutionDir)src\lab3\MirrorSphere.h" />
+    <ClInclude Include="$(SolutionDir)src\common\CommonDeclarations.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="fx\floor_fragment.glsl" />

@@ -39,14 +39,14 @@
     <ClCompile Include="$(SolutionDir)src\common\utils.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
-    <ClCompile Include="$(SolutionDir)src\common\Texture2D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="$(SolutionDir)src\lab3\Floor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="$(SolutionDir)src\lab3\MirrorSphere.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)src\common\Texture2D.cpp">
+      <Filter>Source Files\common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -65,13 +65,7 @@
     <ClInclude Include="$(SolutionDir)src\common\utils.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
-    <ClInclude Include="$(SolutionDir)src\common\Texture2D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="$(SolutionDir)src\common\TextureLoadException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(SolutionDir)src\lab3\CommonDeclarations.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="$(SolutionDir)src\lab3\Floor.h">
@@ -79,6 +73,12 @@
     </ClInclude>
     <ClInclude Include="$(SolutionDir)src\lab3\MirrorSphere.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)src\common\Texture2D.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\CommonDeclarations.h">
+      <Filter>Header Files\common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

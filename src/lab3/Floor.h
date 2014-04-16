@@ -3,7 +3,7 @@
 #include "../common/glincludes.h"
 #include "../common/Effect.h"
 #include "../common/Texture2D.h"
-#include "CommonDeclarations.h"
+#include "../common/CommonDeclarations.h"
 
 namespace zf
 {

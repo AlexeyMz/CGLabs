@@ -7,7 +7,7 @@
 #include "../common/Effect.h"
 #include "../common/Texture2D.h"
 #include "../common/utils.h"
-#include "CommonDeclarations.h"
+#include "../common/CommonDeclarations.h"
 #include "Floor.h"
 #include "MirrorSphere.h"
 
