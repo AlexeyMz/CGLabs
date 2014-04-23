@@ -56,7 +56,9 @@ namespace zf
 	GLint Effect::Uniform(const char *name)
 	{
 		assert(programID != 0);
-		return glGetUniformLocation(programID, name);
+		GLint location = glGetUniformLocation(programID, name);
+		//assert(location >= 0);
+		return location;
 	}
 
 	void Effect::InitIfNeed()

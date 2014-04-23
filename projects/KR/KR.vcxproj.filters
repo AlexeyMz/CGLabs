@@ -25,6 +25,9 @@
     <Filter Include="Resource Files\textures">
       <UniqueIdentifier>{7ac9a9b0-d153-4c93-97ba-f0d25d81d9f2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\textures\sky">
+      <UniqueIdentifier>{a53fb65c-3ac8-4b3c-bf8c-9cc88a26960f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(SolutionDir)src\common\Effect.h">
@@ -48,11 +51,23 @@
     <ClInclude Include="$(SolutionDir)src\common\utils.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\kr\Water.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\kr\ShaderSources.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\CommonDeclarations.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\Cubemap.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\Mesh.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(SolutionDir)src\kr\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="$(SolutionDir)src\common\Effect.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
@@ -65,5 +80,58 @@
     <ClCompile Include="$(SolutionDir)src\common\Shader.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\kr\Water.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Cubemap.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Mesh.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\kr\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="fx\water_drop.glsl">
+      <Filter>Resource Files\fx</Filter>
+    </None>
+    <None Include="fx\water_normal.glsl">
+      <Filter>Resource Files\fx</Filter>
+    </None>
+    <None Include="fx\water_sphere.glsl">
+      <Filter>Resource Files\fx</Filter>
+    </None>
+    <None Include="fx\water_update.glsl">
+      <Filter>Resource Files\fx</Filter>
+    </None>
+    <None Include="fx\water_vertex.glsl">
+      <Filter>Resource Files\fx</Filter>
+    </None>
+    <None Include="textures\cube.tga">
+      <Filter>Resource Files\textures</Filter>
+    </None>
+    <None Include="fx\plane_vertex.glsl">
+      <Filter>Resource Files\fx</Filter>
+    </None>
+    <None Include="textures\sky\zpos.tga">
+      <Filter>Resource Files\textures\sky</Filter>
+    </None>
+    <None Include="textures\sky\xneg.tga">
+      <Filter>Resource Files\textures\sky</Filter>
+    </None>
+    <None Include="textures\sky\xpos.tga">
+      <Filter>Resource Files\textures\sky</Filter>
+    </None>
+    <None Include="textures\sky\yneg.tga">
+      <Filter>Resource Files\textures\sky</Filter>
+    </None>
+    <None Include="textures\sky\ypos.tga">
+      <Filter>Resource Files\textures\sky</Filter>
+    </None>
+    <None Include="textures\sky\zneg.tga">
+      <Filter>Resource Files\textures\sky</Filter>
+    </None>
   </ItemGroup>
 </Project>

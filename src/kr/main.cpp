@@ -2,20 +2,34 @@
 #include <iostream>
 #include <tuple>
 #include <sstream>
+#include <vector>
+#include <algorithm>
+#include <random>
 
 #include "../common/glincludes.h"
 #include "../common/Effect.h"
 #include "../common/Texture2D.h"
 #include "../common/utils.h"
 #include "../common/CommonDeclarations.h"
+#include "../common/Cubemap.h"
+
+#include "ShaderSources.h"
+#include "Water.h"
 
 class Scene {
 public:
 	Scene()
 		: isLeftButtonPressed(false),
-		cameraPosition(0, 0, 5), cameraRight(1, 0, 0), cameraUp(0, 1, 0), cameraLook(0, 0, -1)
+		cameraPosition(0, 0, 5), cameraRight(1, 0, 0), cameraUp(0, 1, 0), cameraLook(0, 0, -1),
+		lightDirection(2.0f, 2.0f, -1.0f), sphereCenter(-0.4f, -0.75f, 0.2f), sphereRadius(0.25f),
+		frame(0), distribution(-1.0f, 1.0f)
 	{
+		lightDirection = glm::normalize(lightDirection);
+		oldCenter = sphereCenter;
 		UpdateCamera();
+
+		std::random_device rd;
+		random.seed(rd());
 	}
 
 	void Init()
@@ -23,27 +37,173 @@ public:
 		// Black background
 		glClearColor(0, 0, 0, 1);
 		
-		glEnable(GL_CULL_FACE);
 		glEnableClientState(GL_VERTEX_ATTRIB_ARRAY_POINTER);
+
+		waterMesh.AddPlane(200, 200);
+		cubeMesh.AddCube();
+		cubeMesh.Triangles.erase(cubeMesh.Triangles.begin() + 4, cubeMesh.Triangles.begin() + 6);
+
+		sideTexture.LoadFromFile("textures/cube.tga", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_REPEAT);
+		cubemap.LoadFromFiles("textures/sky/*.tga");
+		casusticsTexture.InitializeEmpty(1024, 1024, GL_LINEAR, GL_LINEAR, GL_UNSIGNED_BYTE);
+
+		zf::Shader waterVertex(GL_VERTEX_SHADER);
+		waterVertex.CompileFile("fx/plane_vertex.glsl");
+
+		std::string underwaterSource = std::string(shader_sources::helper) + shader_sources::waterMain + shader_sources::underwater;
+		std::string aboveSource = std::string(shader_sources::helper) + shader_sources::waterMain + shader_sources::aboveWater;
+
+		{ // water
+			zf::Shader underwaterFragment(GL_FRAGMENT_SHADER), aboveFragment(GL_FRAGMENT_SHADER);
+			underwaterEffect.Attach(waterVertex).Attach(underwaterFragment.CompileText(underwaterSource.c_str())).Link();
+			aboveWaterEffect.Attach(waterVertex).Attach(aboveFragment.CompileText(aboveSource.c_str())).Link();
+		}
+
+		{ // sphere
+			zf::Shader vertex(GL_VERTEX_SHADER), fragment(GL_FRAGMENT_SHADER);
+			std::string vertexSource = std::string(shader_sources::helper) + shader_sources::sphereVertex;
+			std::string fragmentSource = std::string(shader_sources::helper) + shader_sources::sphereFragment;
+			sphereEffect.Attach(vertex.CompileText(vertexSource.c_str())).Attach(fragment.CompileText(fragmentSource.c_str())).Link();
+		}
+
+		{ // cube
+			zf::Shader vertex(GL_VERTEX_SHADER), fragment(GL_FRAGMENT_SHADER);
+			std::string vertexSource = std::string(shader_sources::helper) + shader_sources::cubeVertex;
+			std::string fragmentSource = std::string(shader_sources::helper) + shader_sources::cubeFragment;
+			cubeEffect.Attach(vertex.CompileText(vertexSource.c_str())).Attach(fragment.CompileText(fragmentSource.c_str())).Link();
+		}
+
+		{ // casustics
+			zf::Shader vertex(GL_VERTEX_SHADER), fragment(GL_FRAGMENT_SHADER);
+			std::string vertexSource = std::string(shader_sources::helper) + shader_sources::causticsVertex;
+			std::string fragmentSource = std::string(shader_sources::helper) + shader_sources::causticsFragment;
+			casusticsEffect.Attach(vertex.CompileText(vertexSource.c_str())).Attach(fragment.CompileText(fragmentSource.c_str())).Link();
+		}
+
+		water.Init();
+	}
+
+	void UpdateCaustics()
+	{
+		zf::SetRenderTo renderTo(casusticsTexture);
+		water.Texture().Bind(0);
+
+		casusticsEffect.Apply();
+		glUniform3fv(casusticsEffect.Uniform("light"), 1, glm::value_ptr(lightDirection));
+		glUniform1i(casusticsEffect.Uniform("water"), 0);
+		glUniform3fv(casusticsEffect.Uniform("sphereCenter"), 1, glm::value_ptr(sphereCenter));
+		glUniform1f(casusticsEffect.Uniform("sphereRadius"), sphereRadius);
+
+		waterMesh.Draw();
+	}
+
+	void RenderWater(glm::mat4 &mvp)
+	{
+		water.Texture().Bind(0);
+		sideTexture.Bind(1);
+		zf::BindCubemap cubeBinding(cubemap, 2);
+		casusticsTexture.Bind(3);
+		zf::UseCapability c1(GL_CULL_FACE, false);
+
+		for (int i = 0; i < 2; i++) {
+			glCullFace(i ? GL_BACK : GL_FRONT);
+
+			zf::Effect &eff = i ? underwaterEffect : aboveWaterEffect;
+			eff.Apply();
+			glUniform3fv(eff.Uniform("light"), 1, glm::value_ptr(lightDirection));
+			glUniform1i(eff.Uniform("water"), 0);
+			glUniform1i(eff.Uniform("tiles"), 1);
+			glUniform1i(eff.Uniform("sky"), 2);
+			glUniform1i(eff.Uniform("causticTex"), 3);
+			glUniform3fv(eff.Uniform("eye"), 1, glm::value_ptr(cameraPosition));
+			glUniform3fv(eff.Uniform("sphereCenter"), 1, glm::value_ptr(sphereCenter));
+			glUniform1f(eff.Uniform("sphereRadius"), sphereRadius);
+			glUniformMatrix4fv(eff.Uniform("MVP"), 1, false, glm::value_ptr(mvp));
+
+			waterMesh.Draw();
+		}
+	}
+
+	void RenderSphere(glm::mat4 &mvp)
+	{
+		water.Texture().Bind(0);
+		casusticsTexture.Bind(1);
+
+		zf::Effect &eff = sphereEffect;
+		eff.Apply();
+		glUniform3fv(eff.Uniform("light"), 1, glm::value_ptr(lightDirection));
+		glUniform1i(eff.Uniform("water"), 0);
+		glUniform1i(eff.Uniform("causticTex"), 1);
+		glUniform3fv(eff.Uniform("sphereCenter"), 1, glm::value_ptr(sphereCenter));
+		glUniform1f(eff.Uniform("sphereRadius"), sphereRadius);
+		glUniformMatrix4fv(eff.Uniform("MVP"), 1, false, glm::value_ptr(mvp));
+
+		// TODO: draw sphere mesh
+	}
+
+	void RenderCube(glm::mat4 &mvp)
+	{
+		zf::UseCapability c1(GL_CULL_FACE, true);
+		water.Texture().Bind(0);
+		sideTexture.Bind(1);
+		casusticsTexture.Bind(2);
+
+		zf::Effect &eff = cubeEffect;
+		eff.Apply();
+		glUniform3fv(eff.Uniform("light"), 1, glm::value_ptr(lightDirection));
+		glUniform1i(eff.Uniform("water"), 0);
+		glUniform1i(eff.Uniform("tiles"), 1);
+		glUniform1i(eff.Uniform("causticTex"), 2);
+		glUniform3fv(eff.Uniform("sphereCenter"), 1, glm::value_ptr(sphereCenter));
+		glUniform1f(eff.Uniform("sphereRadius"), sphereRadius);
+		glUniformMatrix4fv(eff.Uniform("MVP"), 1, false, glm::value_ptr(mvp));
+
+		cubeMesh.Draw();
+	}
+
+	void Update(float seconds)
+	{
+		//if (seconds > 1) return;
+		frame += seconds * 2;
+
+		// Displace water around the sphere
+		water.MoveSphere(oldCenter, sphereCenter, sphereRadius);
+		oldCenter = sphereCenter;
+
+		// Update the water simulation and graphics
+		water.StepSimulation();
+		water.StepSimulation();
+		water.UpdateNormals();
+		UpdateCaustics();
 	}
 
 	void Render()
 	{
 		// Clear the window with current clearing color
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		glEnable(GL_DEPTH_TEST);
 
-		//TODO: draw something
+		glm::mat4 model = glm::mat4();
+		glm::mat4 mvp = projection * view * model;
 
-		glDisable(GL_DEPTH_TEST);
-		glUseProgram(0);
-		glRasterPos2f(-0.85f, 0.85f);
+		{ // draw scene
+			zf::UseCapability c1(GL_DEPTH_TEST, true);
+			RenderCube(mvp);
+			RenderWater(mvp);
+			//RenderSphere(mvp);
+		}
 
-		std::ostringstream os;
-		os << "camera position: (" << zf::ToString(cameraPosition) << ")"
-		   << "\n" "camera look: (" << zf::ToString(cameraLook) << ")";
-		std::string info = os.str();
-		glutBitmapString(GLUT_BITMAP_HELVETICA_18, reinterpret_cast<const unsigned char *>(info.c_str()));
+		{ // draw info text
+			zf::UseCapability c1(GL_DEPTH_TEST, false);
+			glUseProgram(0);
+			glRasterPos2f(-0.85f, 0.85f);
+
+			std::ostringstream os;
+			os << "camera position: (" << zf::ToString(cameraPosition) << ")"
+			   << "\n" "camera look: (" << zf::ToString(cameraLook) << ")"
+			   << "\n" "[s] -> update, [d,f,g] -> add random drop";
+			std::string info = os.str();
+			glutBitmapString(GLUT_BITMAP_HELVETICA_18, reinterpret_cast<const unsigned char *>(info.c_str()));
+		}
 
 		glutSwapBuffers();
 	}
@@ -51,14 +211,13 @@ public:
 	void UpdateCamera()
 	{
 		auto position = cameraPosition;
-		position.y = std::max(0.0f, position.y);
 		view = glm::lookAt(position, position + cameraLook, cameraUp);
 	}
 
 	void UpdateProjection(int viewportWidth, int viewportHeight)
 	{
 		float aspectRatio = 1.0f * viewportWidth / viewportHeight;
-		projection = glm::perspective(45.0f, aspectRatio, 1.0f, 500.0f);
+		projection = glm::perspective(45.0f, 1.0f * aspectRatio, 0.51f, 100.0f);
 	}
 
 	void OnMouseAction(int button, int state, int x, int y)
@@ -110,6 +269,15 @@ public:
 
 	void OnKeyPress(unsigned char key, int x, int y)
 	{
+		if (key == 's') {
+			Update(0.1f);
+		} else if (key == 'd') {
+			water.AddDrop(distribution(random), distribution(random), 0.03f, 0.03f);
+		} else if (key == 'f') {
+			water.AddDrop(distribution(random), distribution(random), 0.06f, 0.10f);
+		} else if (key == 'g') {
+			water.AddDrop(distribution(random), distribution(random), 0.10f, 0.20f);
+		}
 		glutPostRedisplay();
 	}
 
@@ -128,6 +296,23 @@ private:
 	bool isLeftButtonPressed;
 	bool isRightButtonPressed;
 	glm::vec2 mousePosition;
+
+	glm::vec3 lightDirection;
+	glm::vec3 sphereCenter, oldCenter;
+	float sphereRadius;
+
+	zf::Texture2D sideTexture, casusticsTexture;
+	zf::Effect underwaterEffect, aboveWaterEffect;
+	zf::Effect sphereEffect, cubeEffect, casusticsEffect;
+
+	zf::Water water;
+	zf::Cubemap cubemap;
+
+	zf::Mesh waterMesh, sphereMesh, cubeMesh;
+
+	float frame;
+	std::mt19937 random;
+	std::uniform_real_distribution<float> distribution;
 };
 
 Scene scene;
@@ -217,13 +402,6 @@ int main(int argc, char *argv[])
 	glutMouseWheelFunc([](int button, int direction, int x, int y){
 		scene.OnMouseWheel(button, direction);
 	});
-
-	int menu = glutCreateMenu([](int selectedItem){
-		//if (selectedItem == 1)
-		//	scene.ToggleIsBumpEnabled();
-	});
-	//glutAddMenuEntry("Toggle Bump Mapping", 1);
-	glutAttachMenu(GLUT_RIGHT_BUTTON);
 
 	glutMainLoop();
 	return 0;

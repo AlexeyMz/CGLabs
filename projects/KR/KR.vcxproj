@@ -65,8 +65,8 @@
       <AdditionalDependencies>glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /i "$(ProjectDir)fx" "$(OutDir)fx"
-xcopy /y /i "$(ProjectDir)textures" "$(OutDir)textures"
+      <Command>xcopy /e /y /i "$(ProjectDir)fx" "$(OutDir)fx"
+xcopy /e /y /i "$(ProjectDir)textures" "$(OutDir)textures"
 copy /y "$(SolutionDir)libs\glew-1.10.0\bin\Release\Win32\glew32.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -85,8 +85,8 @@ copy /y "$(SolutionDir)libs\glew-1.10.0\bin\Release\Win32\glew32.dll" "$(OutDir)
       <AdditionalDependencies>glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /i "$(ProjectDir)fx" "$(OutDir)fx"
-xcopy /y /i "$(ProjectDir)textures" "$(OutDir)textures"
+      <Command>xcopy /e /y /i "$(ProjectDir)fx" "$(OutDir)fx"
+xcopy /e /y /i "$(ProjectDir)textures" "$(OutDir)textures"
 copy /y "$(SolutionDir)libs\glew-1.10.0\bin\Release\Win32\glew32.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -98,13 +98,36 @@ copy /y "$(SolutionDir)libs\glew-1.10.0\bin\Release\Win32\glew32.dll" "$(OutDir)
     <ClInclude Include="$(SolutionDir)src\common\Texture2D.h" />
     <ClInclude Include="$(SolutionDir)src\common\TextureLoadException.h" />
     <ClInclude Include="$(SolutionDir)src\common\utils.h" />
+    <ClInclude Include="..\..\src\common\CommonDeclarations.h" />
+    <ClInclude Include="..\..\src\common\Cubemap.h" />
+    <ClInclude Include="..\..\src\common\Mesh.h" />
+    <ClInclude Include="..\..\src\kr\ShaderSources.h" />
+    <ClInclude Include="..\..\src\kr\Water.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(SolutionDir)src\common\Effect.cpp" />
     <ClCompile Include="$(SolutionDir)src\common\Shader.cpp" />
     <ClCompile Include="$(SolutionDir)src\common\Texture2D.cpp" />
     <ClCompile Include="$(SolutionDir)src\common\utils.cpp" />
-    <ClCompile Include="$(SolutionDir)src\kr\main.cpp" />
+    <ClCompile Include="..\..\src\common\Cubemap.cpp" />
+    <ClCompile Include="..\..\src\common\Mesh.cpp" />
+    <ClCompile Include="..\..\src\kr\Water.cpp" />
+    <ClCompile Include="..\..\src\kr\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="fx\water_drop.glsl" />
+    <None Include="fx\water_normal.glsl" />
+    <None Include="fx\plane_vertex.glsl" />
+    <None Include="fx\water_sphere.glsl" />
+    <None Include="fx\water_update.glsl" />
+    <None Include="fx\water_vertex.glsl" />
+    <None Include="textures\cube.tga" />
+    <None Include="textures\sky\xneg.tga" />
+    <None Include="textures\sky\xpos.tga" />
+    <None Include="textures\sky\yneg.tga" />
+    <None Include="textures\sky\ypos.tga" />
+    <None Include="textures\sky\zneg.tga" />
+    <None Include="textures\sky\zpos.tga" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

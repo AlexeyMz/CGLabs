@@ -2,6 +2,7 @@
 #include <iostream>
 #include <tuple>
 #include <sstream>
+#include <algorithm>
 
 #include "../common/glincludes.h"
 #include "../common/Effect.h"
